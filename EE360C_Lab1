@@ -1,0 +1,127 @@
+/*
+ * Name: Tatiana Flores
+ * EID: th27979
+ */
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+/**
+ * Your solution goes in this class.
+ * 
+ * Please do not modify the other files we have provided for you, as we will use
+ * our own versions of those files when grading your project. You are
+ * responsible for ensuring that your solution works with the original version
+ * of all the other files we have provided for you.
+ * 
+ * That said, please feel free to add additional files and classes to your
+ * solution, as you see fit. We will use ALL of your additional files when
+ * grading your solution.
+ */
+public class Program1 extends AbstractProgram1 {
+    /**
+     * Determines whether a candidate Matching represents a solution to the
+     * Stable Marriage problem. Study the description of a Matching in the
+     * project documentation to help you with this.
+     */
+	// this method returns preference value of given user 
+		private int  userRank(Matching allocation, int UserIndex, int ServerIndex) {
+	    	ArrayList<ArrayList<Integer>> ServPref = allocation.getServerPreference();
+	    	int i=0;
+			int NumUsers = allocation.getUserCount();
+        	for(i= 0; i< NumUsers; i++) {
+        		if(ServPref.get(ServerIndex).get(i)==UserIndex)
+        			break;	
+	           }
+			   return i;
+			 } 
+	// this method returns preference value of given server 
+		private int  serverRank(Matching allocation, int UserIndex, int ServerIndex) {
+			ArrayList<ArrayList<Integer>> UsPref= allocation.getUserPreference();
+	    	int i=0;
+	    	int NumServers = allocation.getServerCount();
+        	for(i= 0; i< NumServers; i++) {
+        		if(UsPref.get(UserIndex).get(i)==ServerIndex) 
+        			break;		
+	      }
+        //	System.out.printf("%s, %s, %s, %s\n", UserIndex, i, UsPref.get(UserIndex).get(i), ServerIndex);
+			    return i;
+			}
+    		public boolean isStableMatching(Matching allocation) {
+    	    	ArrayList<Integer> MatchArray = allocation.getUserMatching();
+    	    	ArrayList<Integer> ServSlots =allocation.getServerSlots(); //array of slots
+    	    	int TotalNumSlots =allocation.totalServerSlots();
+    	    	int Count =0; int CountEmpty =0;
+    	    	int Size =MatchArray.size();
+    	    //	Program1.Inner1 inner1 = new Program1().new Inner1();// referring to class Inner1
+    	    	
+    	    	if(Size==0) { // if given matching set is empty -unstable
+    	    		return false;
+    	    	}
+    	    	 // if there are idle users and not all servers' slots are filled -unstable
+    	    	   for (int index=0; index< Size; index++) { 
+    	    	      int Serv = MatchArray.get(index);
+    	    		  if (Serv!=-1) {
+    	    			 Count=Count+1;
+    	    		   }
+    	    		  if (Serv==-1) {
+    	    			 CountEmpty=CountEmpty+1;
+    	    		    }
+    	    		  }
+    	    		 if(Count < TotalNumSlots && CountEmpty>0) 
+    	    		     return false;
+    	    		 
+    	    		 if (Size<TotalNumSlots)
+    	    			 return false;
+    	    	        		                            
+                                               
+    	    	   for (int index =0; index < Size-1; index++) { // first instability check 
+                       int Serv = MatchArray.get(index);// user is assigned to this server
+                       for (int index1=index+1; index1 < Size; index1++) {
+                           int ServInd = MatchArray.get(index1);
+                           if (Serv == -1) {
+                               if(ServInd!=-1) { // another user is not idle
+                                   int a= userRank(allocation, index, ServInd);
+                                   int b= userRank(allocation, index1, ServInd);
+                                   if ( a<b ) { // idle user is preferred 
+                                       return false;
+                                     }
+                                 }
+                             } else {
+                                 int a= userRank(allocation, index, Serv);
+                                 int b= userRank(allocation, index1, Serv);
+                                 if (a>b && ServInd==-1) {
+                                    return false; // server's preference for idle user is higher 
+                                  } 
+                                 if (ServInd!=-1 && Serv!=ServInd) {
+                                    int z= serverRank(allocation, index1, Serv);
+                                    int y= serverRank(allocation, index1, ServInd);
+                                    if (a>b && z<y) {
+                                       return false;
+                                     }
+                                  }
+                              }
+                          }
+                      } 
+       return true; 
+    }
+    	
+    /**
+     * Determines a solution to the Stable Marriage problem from the given input
+     * set. Study the project description to understand the variables which
+     * represent the input to your solution.
+     * 
+     * @return A stable Matching.
+     */
+    public Matching stableMarriageGaleShapley(Matching allocation) {
+
+    	
+        /* TODO implement this function */
+        return null; /* TODO remove this line */
+    }
+}
