@@ -1,0 +1,260 @@
+/**
+ * Created by tkalbar on 3/2/19.
+Tatiana Flores
+EE 360c
+Programming Assignment 2
+ */
+import java.util.*;
+import java.util.Arrays; // imports
+import java.lang.*; 
+import java.io.*; 
+import java.util.LinkedList;
+import java.util.Map; 
+import java.util.HashMap; 
+import java.util.Iterator;
+import java.util.PriorityQueue;
+import java.util.Vector;
+import java.util.ArrayList; 
+
+public class Program2{
+	class edge {                            // class edge
+		int weight; node source; node dest;
+		public edge(node source, node dest, int weight) {
+			this.source = source;
+		    this.dest = dest;
+		    this.weight = weight;
+		}
+		public String toString(){
+			return "edge: " + this.source + " " + this.dest  + " " + this.weight;
+		}
+		public node getSource(){
+			return this.source;
+		}
+		public node getDest(){
+			return this.dest;
+		}
+		public int getWeight(){
+			return this.weight;
+		}
+	}
+
+	class node {                                  // class node
+		int x, y, value;
+		public node(int x, int y, int value) {
+			this.x =x;
+			this.y =y;
+			this.value =value;
+		}
+		public String toString(){
+			return "node: " + this.x + " " + this.y  + " " + this.value +" ";
+		} 
+		public int getX(){
+			return this.x;
+		}
+		public int getY(){
+			return this.y;
+		}
+		public int getValue(){
+			 return this.value;
+		}
+		@Override                           // equals needed for boolean ArrayList<node>contains() without it does not work
+		public boolean equals(Object obj) { 
+		          
+		    // checking if both the object references are  
+		    // referring to the same object. 
+			if(this == obj) 
+				return true; 
+		          
+		        // it checks if the argument is of the  
+		        // type node by comparing the classes  
+		        // of the passed argument and this object. 
+		        // if(!(obj instanceof Geek)) return false; ---> avoid. 
+		     if(obj == null || obj.getClass()!= this.getClass()) 
+		         return false; 
+		          
+		        // type casting of the argument.  
+		     node Node = (node) obj; 
+		          
+		        // comparing the state of argument with  
+		        // the state of 'this' Object. 
+		     return (Node.x == this.x && Node.y == this.y && Node.value ==this.value); 
+		 } 
+		  
+	}
+		
+	class EdgeComparator implements Comparator<edge>{  // new Comparator for Priority Queue but it was not used in the lab eventually 
+	    public int compare(edge a, edge b) 
+	    { 
+	        return a.getWeight() - b.getWeight(); 
+	    } 
+	}
+			public int constructIntensityGraph(int[][] image) {
+				int row =image.length;
+				int col =image[0].length;
+				int V =row*col; //number of vertices
+				int E=((row-1)*col +(col-1)*row)*2; //number of edges
+				int [] edge1 =new int[E*2]; //both direction edges
+				int Sum1=0;
+				int Sum2 =0;
+				int Edge=0;
+				int v =0;
+				for (int i=0; i<row-1; i++) {
+					for (int j=0; j< col; j++) {
+						Edge =(image[i+1][j]-image[i][j]);
+						if (Edge<0) { // case if edge is negative, we need an absolute value
+							Edge =Edge*(-1);
+						} 
+							Sum1=Sum1+Edge;
+					}
+				}	
+				for (int i=0; i<row; i++) {
+					for (int j=0; j<col-1; j++) {
+						Edge=image[i][j+1]-image[i][j];
+						if (Edge<0) { //case when edge is negative, we need an absolute value
+							Edge =Edge*(-1);
+						}
+						Sum2=Sum2+Edge;
+					}	
+				}
+				Vector<Vector<node>> adjList1 = new Vector<Vector<node>>();
+				for (int b = 0; b < V; b++){
+					adjList1.add(new Vector<node>());
+				}
+				int e=0; // constructing adjacency list
+				int i=0;
+				int j=0;
+				for (i=0; i<row; i++) {     //  this double for loop is O(row*col)=O(V)
+					for (j=0; j <col; j++) { 
+						Vector<node> M= new Vector<node>();	// creating vector of edges for each node
+						M.add(new node(i, j, image[i][j])); //adding a head of each list
+						e=e+1;
+						if(i-1>=0) {
+							edge1[e]=(image[i-1][j]-image[i][j]);
+							if (edge1[e]<0) {             // abs value of edge weight
+								edge1[e]=edge1[e]*(-1);
+							}
+							M.add(new node(i-1, j, image[i-1][j])); 
+							e=e+1;
+						}
+						if(i+1<image.length) {
+							edge1[e]=(image[i+1][j]-image[i][j]);
+							if (edge1[e]<0) {             // abs value of edge weight
+								edge1[e]=edge1[e]*(-1);
+							}
+							M.add(new node(i+1, j, image[i+1][j]));  
+							e=e+1;
+						}
+						if(j-1>=0) {
+							edge1[e]=(image[i][j-1]-image[i][j]);
+							if (edge1[e]<0) {             // abs value of edge weight
+								edge1[e]=edge1[e]*(-1);
+							}
+							M.add(new node(i, j-1, image[i][j-1])); 
+							e=e+1;
+						}
+						if(j+1<image[0].length) {
+							edge1[e]=(image[i][j+1]-image[i][j]);
+							if (edge1[e]<0) {             // abs value of edge weight
+								edge1[e]=edge1[e]*(-1);
+							}
+							M.add(new node(i, j+1, image[i][j+1])); 	 
+							e=e+1;
+						}
+						adjList1.set(v,M);
+						v=v+1;	
+					}
+				}
+				//System.out.println(adjList1);   //// this will print out adjacency list
+				return (Sum1+Sum2);
+			}
+
+
+			public int constructPrunedGraph(int[][] image){
+				int row =image.length;
+				int col =image[0].length;
+				int V =row*col; //number of vertices
+				node x =new node(0, 0, image[0][0]); // root node of our matrix
+				ArrayList<node> mst = new ArrayList<node>(V); // ArrayList that will hold Minimum Spanning Tree nodes
+				mst.add(x); // adding the first node to the MST == root node
+				int total=0; // sum of edges in MST 
+				for (int g=0; g< V-1; g++ ) {  
+					edge Minimum =check(mst, image); //returning min edge calling helper function check
+					mst.add(Minimum.getDest()); // check returns minimum edge from adjacent and destination node is added to MST
+					total =total+Minimum.getWeight();
+				}	  
+				return total;    
+			} 
+			
+			public edge check(ArrayList<node> mst1, int[][] image) { // helper function takes current MST ArrayList and our graph
+																	// and returns minimum edge from all adjacent
+			//	PriorityQueue<edge> pq = new PriorityQueue<edge>(new EdgeComparator()); it's not needed but was written for priority queue
+				ArrayList<edge> Edges= new ArrayList<edge>(); // creating container for adjacent edges for current MST
+				int weight1=0; 
+				node parent =mst1.get(0);
+				edge Min =new edge(parent, parent, 0);
+				node current =mst1.get(0);
+				for(int h=0; h<mst1.size(); h++) {
+					parent =mst1.get(h);	
+					int i=parent.getX();
+					int j=parent.getY();// coordinates of the node
+					if(i-1>=0) {
+						current =new node(i-1, j, image[i-1][j]);
+						if(false==mst1.contains(current)) { // if this node not in MST yet
+							weight1 =parent.getValue()-current.getValue();
+							if (weight1<0) {
+								weight1=weight1*(-1);
+							}
+							Edges.add(new edge(parent, current , weight1));
+  	    //  pq.add(new edge(parent, current , weight1)); // add the edge to priority queue
+						}
+					}
+					if(i+1<image.length) {
+						current =new node(i+1, j, image[i+1][j]);
+						if( false==mst1.contains(current)) { // if this node not in MST yet
+							weight1 =parent.getValue()-current.getValue();
+							if (weight1<0) {
+								weight1=weight1*(-1);
+							}
+      				 Edges.add(new edge(parent, current , weight1));
+						}
+					}
+					if(j-1>=0) {
+						current =new node(i, j-1, image[i][j-1]);
+						if( false==mst1.contains(current)) { // if this node not in MST yet 
+							weight1 =parent.getValue()-current.getValue();
+							if (weight1<0) {
+								weight1=weight1*(-1);
+							}
+							Edges.add(new edge(parent, current , weight1));
+						}
+					}
+					if(j+1<image[0].length) {
+						current =new node(i, j+1, image[i][j+1]);
+						if( false==mst1.contains(current)) { // if this node not in MST yet  
+							weight1 =parent.getValue()-current.getValue();
+							if (weight1<0) {
+								weight1=weight1*(-1);	
+							}
+							Edges.add(new edge(parent, current , weight1));
+						}  
+					}
+
+				}
+				int Min2 =1000000000; // checking the container of Edges and finding the minimum
+				int index =0;
+				for(int q=0; q<Edges.size(); q++) {
+					edge Rebro =Edges.get(q);
+					if(Rebro.getWeight()<Min2) {
+						Min2=Rebro.getWeight();
+						index =q;
+					}
+				}
+				Min =Edges.get(index);
+				return Min;// returning edge minimum edge from adjacent  
+   }   
+}
+     	
+      
+
+
+
